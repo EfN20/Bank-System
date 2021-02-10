@@ -1,0 +1,199 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Exchange page</title>
+</head>
+<style>
+    @import url('https://fonts.googleapis.com/css2?family=Open+Sans:wght@400;600;800&display=swap');
+
+    html {
+        font-family:
+                'Open Sans',
+                Arial,
+                sans-serif;
+        font-size: 16px;
+        word-spacing: 1px;
+        -ms-text-size-adjust: 100%;
+        -webkit-text-size-adjust: 100%;
+        -moz-osx-font-smoothing: grayscale;
+        -webkit-font-smoothing: antialiased;
+        box-sizing: border-box;
+    }
+
+    *,
+    *::before,
+    *::after {
+        box-sizing: border-box;
+        margin: 0;
+    }
+
+    .index {
+        display: flex;
+        width: 100vw;
+        min-height: 100vh;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+    }
+
+    .index_link {
+        text-decoration: none;
+        font-size: 1.5rem;
+        color: #701DAF;
+        padding: 10px;
+        transition: all .2s;
+        -moz-transition: all .2s;
+        -o-transition: all .2s;
+        -webkit-transition: all .2s;
+    }
+
+    .index_link:hover {
+        color: black;
+    }
+
+    .newCard {
+        border: 1px solid black;
+    }
+
+    select, input {
+        height: 50px;
+    }
+
+</style>
+<body>
+    <div class="index">
+        <div class="newCard">
+            <h1 class="index_link">Wallet info: </h1>
+            <p class="index_link" th:text="|Serial Number: ${wallet.getSerialNumber()}|">Serial Number</p>
+            <p class="index_link" th:text="|KZT: ${wallet.getBalance_kzt()}|">KZT</p>
+            <p class="index_link" th:text="|USD: ${wallet.getBalance_usd()}|">USD</p>
+            <p class="index_link" th:text="|EUR: ${wallet.getBalance_eur()}|">EUR</p>
+        </div>
+
+        <div>
+            <h2 class="index_link">Currency: (In KZT)</h2>
+            <div th:each="rate : ${rateList}">
+                <p th:class="|${rate.getCurrency()} index_link|" th:text="|1 ${rate.getCurrency()} = ${rate.getValue()} KZT|">Currency</p>
+            </div>
+        </div>
+
+        <div class="index_link">
+            <label>From: </label>
+            <select class="from">
+                <option th:text="|${wallet.getBalance_kzt()} KZT|" th:value="KZT" selected></option>
+                <option th:text="|${wallet.getBalance_usd()} USD|" th:value="USD"></option>
+                <option th:text="|${wallet.getBalance_eur()} EUR|" th:value="EUR"></option>
+            </select>
+            <input class="amount" type="number" placeholder="Amount">
+        </div>
+        <div class="index_link">
+            <label>To: </label>
+            <select class="into">
+                <option th:text="KZT" th:value="KZT" selected></option>
+                <option th:text="USD" th:value="USD"></option>
+                <option th:text="EUR" th:value="EUR"></option>
+            </select>
+            <input class="result" type="number" disabled>
+        </div>
+        <button class="convert index_link" type="submit">Convert</button>
+    </div>
+
+    <script type="text/javascript" src="https://code.jquery.com/jquery-3.5.1.min.js"></script>
+    <script th:inline="javascript">
+        $(document).ready(function() {
+            const USD = parseInt($('.USD').text().substr(8, 3));
+            const EUR = parseInt($('.EUR').text().substr(8, 3));
+            const walletID = /*[[${wallet.getId()}]]*/ "id";
+            let newBalance_KZT = /*[[${wallet.getBalance_kzt()}]]*/ "kzt";
+            let newBalance_USD = /*[[${wallet.getBalance_usd()}]]*/ "usd";
+            let newBalance_EUR = /*[[${wallet.getBalance_eur()}]]*/ "eur";
+
+            $('.amount').change(function() {
+                let amount = $(this).val();
+                let option1 = $('.from').val();
+                let option2 = $('.into').val();
+                let result = 0;
+                if(option1 === "KZT") {
+                    if(option2 === "USD") {
+                        result = amount/USD;
+                        newBalance_USD += result;
+                    }
+                    else if(option2 === "EUR") {
+                        result = amount/EUR;
+                        newBalance_EUR += result;
+                    }
+                    newBalance_KZT -=amount;
+                }
+
+                if(option1 === "USD") {
+                    if(option2 === "EUR") {
+                        result = (amount*USD)/EUR;
+                        newBalance_EUR += result;
+                    }
+                    else if(option2 === "KZT") {
+                        result = amount*USD;
+                        newBalance_KZT += result;
+                    }
+                    newBalance_USD -=amount;
+                }
+
+                if(option1 === "EUR") {
+                    if(option2 === "USD") {
+                        result = (amount*EUR)/USD;
+                        newBalance_USD += result;
+                    }
+                    else if(option2 === "KZT") {
+                        result = amount*EUR;
+                        newBalance_KZT += result;
+                    }
+                    newBalance_EUR -=amount;
+                }
+                $('.result').val(result);
+
+                console.log("[AMOUNT] " + amount);
+                console.log("[option1] " + option1);
+                console.log("[option2] " + option2);
+                console.log("[USD] " + USD);
+                console.log("[EUR] " + EUR);
+                console.log("[SERIAL NUMBER]" + walletID);
+            });
+
+            $('.convert').click(function(event) {
+                event.preventDefault();
+                console.log("NEW KZT " + newBalance_KZT);
+                console.log("NEW USD " + newBalance_USD);
+                console.log("NEW EUR " + newBalance_EUR);
+                let toSend = {
+                    id: walletID,
+                    balance_kzt: newBalance_KZT,
+                    balance_usd: newBalance_USD,
+                    balance_eur: newBalance_EUR
+                };
+                let jsonSend = JSON.stringify(toSend);
+                console.log(jsonSend)
+                $.ajax({
+                    url: "http://localhost:8080/bank_system_war_exploded/rest/wallet/" + walletID,
+                    type: "POST",
+                    contentType: "application/json; charset=utf-8",
+                    data: jsonSend,
+                    dataType: "json",
+                    // dataType: "text/plain",
+                    success: function(data, textStatus, jqXHR){
+                        console.log(data);
+                        console.log(textStatus);
+                        console.log(jqXHR);
+                        alert(data["response"]);
+                    },
+                    error: function(data, textStatus, jqXHR){
+                        console.log(data);
+                        console.log(textStatus);
+                        console.log(jqXHR);
+                    }
+                });
+            });
+        });
+    </script>
+
+</body>
+</html>

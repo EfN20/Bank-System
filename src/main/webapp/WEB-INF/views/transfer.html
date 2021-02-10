@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Transfer page</title>
+</head>
+<style>
+    @import url('https://fonts.googleapis.com/css2?family=Open+Sans:wght@400;600;800&display=swap');
+
+    html {
+        font-family:
+                'Open Sans',
+                Arial,
+                sans-serif;
+        font-size: 16px;
+        word-spacing: 1px;
+        -ms-text-size-adjust: 100%;
+        -webkit-text-size-adjust: 100%;
+        -moz-osx-font-smoothing: grayscale;
+        -webkit-font-smoothing: antialiased;
+        box-sizing: border-box;
+    }
+
+    *,
+    *::before,
+    *::after {
+        box-sizing: border-box;
+        margin: 0;
+    }
+
+    .index {
+        display: flex;
+        width: 100vw;
+        min-height: 100vh;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+    }
+
+    .index_link {
+        text-decoration: none;
+        font-size: 2rem;
+        color: #701DAF;
+        padding: 10px;
+        transition: all .2s;
+        -moz-transition: all .2s;
+        -o-transition: all .2s;
+        -webkit-transition: all .2s;
+    }
+
+    .index_link:hover {
+        color: black;
+    }
+
+    select, input {
+        height: 50px;
+    }
+
+</style>
+
+<body>
+    <div class="index">
+        <div class="index_link">
+            <div class="select">
+                <label>From: </label>
+                <select class="selectedWallet">
+                    <option th:each="wallet : ${walletList}" th:value="${wallet.getId()}" th:text="|${wallet.getBalance_kzt()} KZT / ${wallet.getBalance_usd()} USD / ${wallet.getBalance_eur()} EUR |">Balance</option>
+                </select>
+                <select class="from">
+                    <option value="KZT">KZT</option>
+                    <option value="USD">USD</option>
+                    <option value="EUR">EUR</option>
+                </select>
+            </div>
+        </div>
+        <input class="amount select" type="number" placeholder="Amount">
+        <div class="index_link">
+            <select class="selectedOperation">
+                <option value="first">Transfer to another bank card</option>
+                <option value="second">Transfer to this bank card</option>
+                <option value="third">Transfer to another your card</option>
+            </select>
+        </div>
+
+        <div class="another-bank index_link">
+            <label>To: </label>
+            <input class="serialNumberTo select" type="number" placeholder="Serial Number of receiver">
+            <input class="transfer" value="Transfer" type="submit">
+        </div>
+
+        <div class="this-bank index_link" style="display:none;">
+            <label>To: </label>
+            <input class="serialNumberTo" type="number" placeholder="Serial Number of receiver">
+            <input class="transfer" value="Transfer" type="submit">
+        </div>
+
+        <div class="this-user index_link" style="display:none;">
+            <label>To: </label>
+            <select class="selectedWallet">
+                <option th:each="wallet : ${walletList}" th:value="${wallet.getId()}" th:text="|${wallet.getBalance_kzt()} KZT / ${wallet.getBalance_usd()} USD / ${wallet.getBalance_eur()} EUR |">Balance</option>
+            </select>
+            <input class="transfer" value="Transfer" type="submit">
+        </div>
+    </div>
+
+</body>
+</html>
+<script type="text/javascript" src="https://code.jquery.com/jquery-3.5.1.min.js"></script>
+<script>
+    $(document).ready(function() {
+        var selectedWalletId;
+        var from;
+        var amount;
+        var selectedOp;
+        $('.selectedWallet, .from, .amount, .selectedOperation').change(function() {
+            selectedWalletId = $('.selectedWallet').val();
+            from = $('.from').val();
+            amount = $('.amount').val();
+            selectedOp = $('.selectedOperation').val();
+            if(selectedOp === "first") {
+                $('.another-bank').css("display", "block");
+                $('.this-bank').css("display", "none");
+                $('.this-user').css("display", "none");
+            }
+            if(selectedOp === "second") {
+                $('.another-bank').css("display", "none");
+                $('.this-bank').css("display", "block");
+                $('.this-user').css("display", "none");
+            }
+            if(selectedOp === "third") {
+                $('.another-bank').css("display", "none");
+                $('.this-bank').css("display", "none");
+                $('.this-user').css("display", "block");
+            }
+            console.log("[SELECTED WALLET ID] " + selectedWalletId);
+            console.log("[FROM CURRENCY] " + from);
+            console.log("[AMOUNT] " + amount);
+            console.log("[SELECTED OPERATION] " + selectedOp);
+        });
+        $('.transfer').click(function(event) {
+            event.preventDefault();
+            let receiverSerialNumber = $(this).prev().val();
+            let toSend = {
+                receiver: receiverSerialNumber,
+                currency: from,
+            };
+            let jsonSend = JSON.stringify(toSend);
+            console.log("[RECEIVER] " + receiverSerialNumber);
+            console.log(toSend);
+            $.ajax({
+                url: "http://localhost:8080/bank_system_war_exploded/rest/wallet/" + selectedWalletId + "/" + amount,
+                type: "POST",
+                contentType: "application/json",
+                data: jsonSend,
+                dataType: "json",
+                success: function(message) {
+                    alert(message["response"]);
+                }
+            });
+        });
+
+    });
+</script>

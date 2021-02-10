@@ -1,0 +1,8 @@
+.idea/
+target/
+src/test/
+src/main/resources/
+src/main/webapp/META-INF/
+bank-system.iml
+/src/main/webapp/WEB-INF/logger.log
+/src/main/webapp/WEB-INF/logger.log.lck

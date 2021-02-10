@@ -1,0 +1,165 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Service Payment</title>
+</head>
+<style>
+    @import url('https://fonts.googleapis.com/css2?family=Open+Sans:wght@400;600;800&display=swap');
+
+    html {
+        font-family:
+                'Open Sans',
+                Arial,
+                sans-serif;
+        font-size: 16px;
+        word-spacing: 1px;
+        -ms-text-size-adjust: 100%;
+        -webkit-text-size-adjust: 100%;
+        -moz-osx-font-smoothing: grayscale;
+        -webkit-font-smoothing: antialiased;
+        box-sizing: border-box;
+    }
+
+    *,
+    *::before,
+    *::after {
+        box-sizing: border-box;
+        margin: 0;
+    }
+
+    .box {
+        position: absolute;
+        top: 25%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+    }
+
+    .box select {
+        background-color: #0563af;
+        color: white;
+        padding: 12px;
+        width: 250px;
+        border: none;
+        font-size: 20px;
+        box-shadow: 0 5px 25px rgba(0, 0, 0, 0.2);
+        -webkit-appearance: button;
+        appearance: button;
+        outline: none;
+    }
+
+    .box::before {
+        content: "\f13a";
+        font-family: FontAwesome;
+        position: absolute;
+        top: 0;
+        right: 0;
+        width: 20%;
+        height: 100%;
+        text-align: center;
+        font-size: 28px;
+        line-height: 45px;
+        color: rgba(255, 255, 255, 0.5);
+        background-color: rgba(255, 255, 255, 0.1);
+        pointer-events: none;
+    }
+
+    .box:hover::before {
+        color: rgba(255, 255, 255, 0.6);
+        background-color: rgba(255, 255, 255, 0.2);
+    }
+
+    .box select option {
+        padding: 30px;
+    }
+
+    .index {
+        display: flex;
+        width: 100vw;
+        min-height: 100vh;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+    }
+
+    .index_link {
+        text-decoration: none;
+        font-size: 2rem;
+        color: #701DAF;
+        padding: 10px;
+        transition: all .2s;
+        -moz-transition: all .2s;
+        -o-transition: all .2s;
+        -webkit-transition: all .2s;
+    }
+
+    .index_link:hover {
+        color: black;
+    }
+
+    .pay {
+        text-transform: uppercase;
+        outline: 0;
+        background: #0563af;
+        width: 100%;
+        border: 0;
+        padding: 15px;
+        color: white;
+        font-size: 14px;
+        -webkit-transition: all 0.3s ease;
+        transition: all 0.3s ease;
+        cursor: pointer;
+    }
+</style>
+<body>
+    <div class="box">
+        <select class="selectedWallet">
+            <option th:each="wallet : ${walletList}" th:value="${wallet.getId()}" th:text="|${wallet.getBalance_kzt()} KZT|"></option>
+        </select>
+    </div>
+
+    <div class="index">
+        <div class="index_link" th:each="service : ${services}">
+            <p class="servName index_link" th:text="${service.getName()}">Name</p>
+            <p class="servPrice index_link" th:text="|${service.getPrice()} KZT|">Price</p>
+            <input class="pay" type="submit" value="Pay">
+        </div>
+    </div>
+
+</body>
+</html>
+<script type="text/javascript" src="https://code.jquery.com/jquery-3.5.1.min.js"></script>
+<script>
+    $(document).ready(function() {
+        $('.pay').click(function(event) {
+            event.preventDefault();
+            let price = parseInt($(this).prev().text());
+            let walletId = parseInt($('.selectedWallet').val());
+            console.log("[PRICE] " + price);
+            console.log("[WalletId] " + walletId);
+            // let toSend = {
+            //     price: price
+            // };
+            // let jsonSend = JSON.stringify(toSend);
+            // console.log(jsonSend);
+            $.ajax({
+                url: "http://localhost:8080/bank_system_war_exploded/rest/payService/" + walletId + "/" + price,
+                type: "POST",
+                contentType: "application/json; charset=utf-8",
+                dataType: "json",
+                // dataType: "text/plain",
+                success: function(data, textStatus, jqXHR){
+                    console.log(data);
+                    console.log(textStatus);
+                    console.log(jqXHR);
+                    alert(data["response"]);
+                },
+                error: function(data, textStatus, jqXHR){
+                    console.log(data);
+                    console.log(textStatus);
+                    console.log(jqXHR);
+                }
+            });
+        });
+    });
+</script>

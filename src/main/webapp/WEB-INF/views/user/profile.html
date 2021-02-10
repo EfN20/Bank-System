@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Profile</title>
+</head>
+<style>
+    @import url('https://fonts.googleapis.com/css2?family=Open+Sans:wght@400;600;800&display=swap');
+
+    html {
+        font-family:
+                'Open Sans',
+                Arial,
+                sans-serif;
+        font-size: 16px;
+        word-spacing: 1px;
+        -ms-text-size-adjust: 100%;
+        -webkit-text-size-adjust: 100%;
+        -moz-osx-font-smoothing: grayscale;
+        -webkit-font-smoothing: antialiased;
+        box-sizing: border-box;
+    }
+
+    *,
+    *::before,
+    *::after {
+        box-sizing: border-box;
+        margin: 0;
+    }
+
+    .index {
+        display: flex;
+        width: 100vw;
+        min-height: 100vh;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+    }
+
+    .index_link {
+        text-decoration: none;
+        font-size: 1.5rem;
+        color: #701DAF;
+        padding: 10px;
+        transition: all .2s;
+        -moz-transition: all .2s;
+        -o-transition: all .2s;
+        -webkit-transition: all .2s;
+    }
+
+    .index_link:hover {
+        color: black;
+    }
+
+    .newCard {
+        border: 1px solid black;
+        margin: 5px;
+    }
+
+    .newCard > a {
+        text-decoration: underline;
+    }
+
+</style>
+<body>
+    <div class="index">
+        <h1 class="index_link">Personal info: </h1>
+        <p class="index_link" th:text="'ID: ' + ${user.getId()}">ID</p>
+        <p class="index_link" th:text="'Phone number: ' + ${user.getPhone()}">Phone</p>
+        <p class="index_link" th:text="'Password: ' + ${user.getPassword()}">Password</p>
+        <p class="index_link" th:text="'Role: ' + ${user.getRole()}">Role</p>
+        <h2 class="index_link">Wallets info: </h2>
+        <div class="newCard" th:each="wallet : ${walletList}">
+            <p class="index_link" th:text="|ID: ${wallet.getId()}|">ID wallet</p>
+            <p class="index_link" th:text="|Serial Number: ${wallet.getSerialNumber()}|">Serial Number</p>
+            <p class="index_link" th:text="|KZT: ${wallet.getBalance_kzt()}|">KZT</p>
+            <p class="index_link" th:text="|USD: ${wallet.getBalance_usd()}|">USD</p>
+            <p class="index_link" th:text="|EUR: ${wallet.getBalance_eur()}|">EUR</p>
+            <a class="index_link" th:href="@{/exchange/{id}(id=${wallet.getId()})}">Exchange balances</a>
+            <a class="index_link" th:href="@{/history/{id}(id=${wallet.getId()})}">History of wallet</a>
+        </div>
+
+        <a class="index_link newCard" th:href="@{/user/{id}/edit(id=${user.getId()})}">Edit profile details</a><br/>
+        <a class="index_link newCard" th:href="@{/user/{id}/newWallet(id=${user.getId()})}">Open new wallet</a>
+    </div>
+</body>
+</html>

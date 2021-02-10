@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Home page</title>
+</head>
+<style>
+    @import url('https://fonts.googleapis.com/css2?family=Open+Sans:wght@400;600;800&display=swap');
+
+    html {
+        font-family:
+                'Open Sans',
+                Arial,
+                sans-serif;
+        font-size: 16px;
+        word-spacing: 1px;
+        -ms-text-size-adjust: 100%;
+        -webkit-text-size-adjust: 100%;
+        -moz-osx-font-smoothing: grayscale;
+        -webkit-font-smoothing: antialiased;
+        box-sizing: border-box;
+    }
+
+    *,
+    *::before,
+    *::after {
+        box-sizing: border-box;
+        margin: 0;
+    }
+
+    .index {
+        display: flex;
+        width: 100vw;
+        min-height: 100vh;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+    }
+
+    .index_link {
+        text-decoration: none;
+        font-size: 2rem;
+        color: #701DAF;
+        padding: 10px;
+        transition: all .2s;
+        -moz-transition: all .2s;
+        -o-transition: all .2s;
+        -webkit-transition: all .2s;
+    }
+
+    .index_link:hover {
+        color: black;
+    }
+</style>
+<body>
+    <div class="index">
+        <a class="index_link" th:href="@{/logout}">Logout</a>
+        <a class="index_link" th:href="@{/user/{id}(id = ${signedUsed.getId()})}">Profile page</a>
+        <a class="index_link" th:href="@{/transfer}">Transfer page</a>
+        <a class="index_link" th:href="@{/service}">Service page</a>
+    </div>
+</body>
+</html>
