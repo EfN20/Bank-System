@@ -4,4 +4,4 @@ First try of Spring and Hibernate;
 Spring: Core, MVC, Security, ORM; 
 Template: Thymeleaf;  
 DB: PostgreSQL;   
-ORM: Hibernate + FasterXML.Jackson; 
+ORM: Hibernate + FasterXML.Jackson(For JSON); 
